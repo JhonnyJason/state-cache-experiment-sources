@@ -1,7 +1,7 @@
 module.exports = {
     getDependencies: () => {
         return {
-	    "thingy-sci-base":"^0.0.4"
+	    "on-change":"^4.0.0"
         }
     }
 }

@@ -1,12 +1,8 @@
 ############################################################
-sci = null
+import {runTests} from "./testmodule"
 
-############################################################
-export initialize = ->
-    sci = allModules.scimodule
-    return
 
 ############################################################
 export serviceStartup = ->
-    sci.prepareAndExpose()
+    runTests()
     return
