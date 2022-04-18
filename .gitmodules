@@ -1,0 +1,6 @@
+[submodule "source/statecachemodule"]
+	path = source/statecachemodule
+	url = git@github.com:JhonnyJason/package-sources-statecachemodule.git
+[submodule "source/statesavermodule"]
+	path = source/statesavermodule
+	url = git@github.com:JhonnyJason/package-sources-statesavermodule.git
