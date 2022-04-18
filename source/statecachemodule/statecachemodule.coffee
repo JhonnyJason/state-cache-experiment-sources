@@ -1,15 +1,10 @@
-export name = "statecachemodule"
 ############################################################
 #region printLogFunctions
-log = (arg) ->
-    if allModules.debugmodule.modulesToDebug["statecachemodule"]?  then console.log "[statecachemodule]: " + arg
-    return
-ostr = (obj) -> JSON.stringify(obj, null, 4)
-olog = (obj) -> log "\n" + ostr(obj)
-print = (arg) -> console.log(arg)
+log = (arg) -> console.log "[statecache]: " + arg
+toJson = (obj) -> JSON.stringify(obj, null, 4)
+olog = (obj) -> log "\n" + toJson(obj)
 #endregion
 
-import * as defaultState from "./defaultstate"
 import * as store from "./statesavermodule"
 
 
@@ -24,101 +19,22 @@ cacheTailEntry = null
 idToCacheEntry = {}
 cacheSize = 0
 maxCacheSize = 4
-    
-toJson = (obj) -> JSON.stringify(obj, null, 4)
-############################################################
-export save = (id, contentObj) ->
-    log "save "+id
-    if idToCacheEntry[id]? then idToCacheEntry[id].touch()
-    else new CacheEntry(id)
 
-    objCache[id] = contentObj
-    contentJson = toJson(contentObj)
-    if contentJson == jsonCache[id] then return
+defaultState = null
+############################################################
+export initialize = (options) ->
+    if options
+        defaultState = options.defaultState
+        store.initialize(options.basePath)
     else
-        jsonCache[id] = contentJson
-        await store.save(id, contentJson)
-    return
-
-export load = (id) ->
-    log "load "+id
-    if !objCache[id]? then loadCache(id)
-    else idToCacheEntry[id].touch()
-    return objCache[id]
-
-export remove = (id) ->
-    log "remove "+id
-    entry = idToCacheEntry[id]
-    return unless entry?
-    entry.remove()
-    await store.remove(id)
-    return
-
-export printCacheState = ->
-    log "\n"
-    if cacheHeadEntry?
-        log "cacheHead Id: "+cacheHeadEntry.id
-        cacheHeadEntry.print()
-
-        entry = cacheHeadEntry.previousEntry
-        while(entry?)
-            entry.print()
-            entry = entry.previousEntry
-        log "cacheTail Id: "+cacheTailEntry.id
-        log "\n"
-    else olog { cacheHeadEntry, cacheTailEntry}
-    olog {jsonCache}
-    olog {cacheSize, maxCacheSize}
-
-############################################################
-loadCache = (id) ->
-    log "loadCache"
-    if !cacheHeadEntry? and !cacheTailEntry? then log "cache is empty!"
-    new CacheEntry(id)
-
-    if !cacheHeadEntry? or !cacheTailEntry? then log "cache has a problem!"
-
-    { contentObj, contentJson } = store.load(id)
-
-    if contentObj? 
-        log "received contentObj"
-        jsonCache[id] = contentJson
-        objCache[id] = contentObj
-    else loadDefault(id)
-    return
-
-loadDefault = (id) ->
-    if !defaultState[id]?
-        jsonCache[id] = "{}"
-        objCache[id] = {}
-    else
-        jsonCache[id] = toJson(defaultState[id])
-        objCache[id] = JSON.parse(jsonCache[id])
-    return
-
-
-############################################################
-uncache = (id) ->
-    delete objCache[id]
-    delete jsonCache[id]
-    delete idToCacheEntry[id]
-    cacheSize--
-    return
-
-############################################################
-cutCacheTail = ->
-    tail = cacheTailEntry
-    return unless tail?
-    cacheTailEntry = tail.nextEntry
-    if cacheTailEntry? then cacheTailEntry.previousEntry = null
-    uncache(tail.id)
+        store.initialize()
     return
 
 ############################################################
 class CacheEntry
     constructor: (@id) ->
-        log "constructor"
-        olog {cacheSize, maxCacheSize}
+        # log "constructor"
+        # olog {cacheSize, maxCacheSize}
 
         @nextEntry = null
         @previousEntry = cacheHeadEntry
@@ -135,9 +51,9 @@ class CacheEntry
         cacheSize++
         # log "cacheHeadEntry?"+cacheHeadEntry? 
         # log "cacheTailEntry?"+cacheTailEntry?
-        olog {cacheSize, maxCacheSize}
+        # olog {cacheSize, maxCacheSize}
         if cacheSize > maxCacheSize then cutCacheTail()
-        olog {cacheSize, maxCacheSize}
+        # olog {cacheSize, maxCacheSize}
 
     touch: ->
         return unless @nextEntry?# we are the head
@@ -168,15 +84,107 @@ class CacheEntry
             cacheHeadEntry = @previousEntry
         uncache(@id)
     
-    print: ->
-        log @id
+    toString: ->
+        result = @id+"\n"
         if @nextEntry?
-            log "  next: "+@nextEntry.id
+            result +="  next: "+@nextEntry.id+"\n"
         else
-            log "  next: null"
+            result +="  next: null\n"
         if @previousEntry?
-            log "  previous: "+@previousEntry.id
+            result +="  previous: "+@previousEntry.id+"\n"
         else
-            log "  previous: null"
+            result += "  previous: null\n"
+        return result
 
+############################################################
+#region internalFunctions
+loadCache = (id) ->
+    # if !cacheHeadEntry? and !cacheTailEntry? then log "cache is empty!"
+    new CacheEntry(id)
+    # if !cacheHeadEntry? or !cacheTailEntry? then log "cache has a problem!"
 
+    { contentObj, contentJson } = store.load(id)
+
+    if contentObj? 
+        # log "received contentObj"
+        jsonCache[id] = contentJson
+        objCache[id] = contentObj
+    else loadDefault(id)
+    return
+
+loadDefault = (id) ->
+    if !defaultState? or !defaultState[id]?
+        jsonCache[id] = "{}"
+        objCache[id] = {}
+    else
+        jsonCache[id] = toJson(defaultState[id])
+        objCache[id] = JSON.parse(jsonCache[id])
+    return
+
+############################################################
+uncache = (id) ->
+    delete objCache[id]
+    delete jsonCache[id]
+    delete idToCacheEntry[id]
+    cacheSize--
+    return
+
+############################################################
+cutCacheTail = ->
+    tail = cacheTailEntry
+    return unless tail?
+    cacheTailEntry = tail.nextEntry
+    if cacheTailEntry? then cacheTailEntry.previousEntry = null
+    uncache(tail.id)
+    return
+
+#endregion
+
+############################################################
+#region exposedFunctions
+export save = (id, contentObj) ->
+    # log "save "+id
+    if idToCacheEntry[id]? then idToCacheEntry[id].touch()
+    else new CacheEntry(id)
+
+    objCache[id] = contentObj
+    contentJson = toJson(contentObj)
+    if contentJson == jsonCache[id] then return
+    else
+        jsonCache[id] = contentJson
+        await store.save(id, contentJson)
+    return
+
+export load = (id) ->
+    # log "load "+id
+    if !objCache[id]? then loadCache(id)
+    else idToCacheEntry[id].touch()
+    return objCache[id]
+
+export remove = (id) ->
+    # log "remove "+id
+    entry = idToCacheEntry[id]
+    return unless entry?
+    entry.remove()
+    await store.remove(id)
+    return
+
+export logCacheState = ->
+    logString = "cacheState:\n"
+    if cacheHeadEntry?
+        logString += "cacheHead Id: "+cacheHeadEntry.id
+        logString += cacheHeadEntry.toString()
+
+        entry = cacheHeadEntry.previousEntry
+        while(entry?)
+            logString += entry.toString()
+            entry = entry.previousEntry
+        logString +="cacheTail Id: "+cacheTailEntry.id
+        logString+= "\n"
+    else logString += toJson({ cacheHeadEntry, cacheTailEntry})
+    logString += "- - - - -\n"
+    # logString += toJson({jsonCache})
+    logString += toJson({cacheSize, maxCacheSize})
+    log logString
+
+#endregion

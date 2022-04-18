@@ -9,7 +9,8 @@ print = (arg) -> console.log(arg)
 #endregion
 
 ############################################################    
-import * as cache from "./statecachemodule"
+import * as state from "./statecachemodule"
+import * as defaultState from "./defaultstate"
 
 sampleData1 = {
     nodeId: "1deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
@@ -42,83 +43,89 @@ sampleData5 = {
 }
 
 ############################################################    
+export initialize = ->
+    state.initialize({defaultState})
+    return
+
+############################################################    
 export runTests = ->
     log "runTests"
     breakingCase()
-    # cache.printCacheState()
+    # state.logCacheState()
 
-    # state = cache.load("state")
-    # # cache.printCacheState()
+    state = state.load("state")
+    olog state
+    # state.logCacheState()
 
-    # cache.save("sample1", sampleData1)
-    # # cache.printCacheState()
+    # state.save("sample1", sampleData1)
+    # # state.logCacheState()
 
-    # cache.save("sample2", sampleData2)
-    # # cache.printCacheState()
+    # state.save("sample2", sampleData2)
+    # # state.logCacheState()
 
-    # cache.save("sample3", sampleData3)
-    # # cache.printCacheState()
+    # state.save("sample3", sampleData3)
+    # # state.logCacheState()
 
-    # cache.save("sample4", sampleData4)
-    # # cache.printCacheState()
+    # state.save("sample4", sampleData4)
+    # # state.logCacheState()
 
-    # cache.save("sample5", sampleData5)
-    # # cache.printCacheState()
+    # state.save("sample5", sampleData5)
+    # # state.logCacheState()
 
-    # state = cache.load("state")
-    # # cache.printCacheState()
-
-
-    # sample1 = cache.load("sample1")
-    # # cache.printCacheState()
+    # state = state.load("state")
+    # # state.logCacheState()
 
 
-
-
-    # # sample2 = cache.load("sample2")
-
-    # sample3 = cache.load("sample3") #this lines breaks it :-(
-
-    # # sample4 = cache.load("sample4")
-
-    # sample5 = cache.load("sample5")
-
-    # sample3 = cache.load("sample3")
+    # sample1 = state.load("sample1")
+    # # state.logCacheState()
 
 
 
-    # cache.remove("state")
 
-    # cache.remove("sample5")
+    # # sample2 = state.load("sample2")
 
-    # cache.remove("sample3")
+    # sample3 = state.load("sample3") #this lines breaks it :-(
 
-    # cache.remove("sample1")
+    # # sample4 = state.load("sample4")
 
-    # cache.remove("sample1")
+    # sample5 = state.load("sample5")
 
-    # sample2 = cache.load("sample2")
+    # sample3 = state.load("sample3")
+
+
+
+    # state.remove("state")
+
+    # state.remove("sample5")
+
+    # state.remove("sample3")
+
+    # state.remove("sample1")
+
+    # state.remove("sample1")
+
+    # sample2 = state.load("sample2")
     # # olog sample2
-    # cache.printCacheState()
+    # state.logCacheState()
 
-    # sample3 = cache.load("sample3")
+    # sample3 = state.load("sample3")
     # olog sample3
-    # cache.printCacheState()
+    # state.logCacheState()
 
-    # cache.save("sample2", sampleData2)
-    # cache.load("sample1")
-    # cache.load("sample3")
-    # cache.load("sample4")
-    # cache.load("sample5")
+    # state.save("sample2", sampleData2)
+    # state.load("sample1")
+    # state.load("sample3")
+    # state.load("sample4")
+    # state.load("sample5")
 
-    # cache.remove("sample1")
-    # cache.remove("sample3")
-    # cache.remove("sample4")
-    # cache.remove("sample5")
+    # state.remove("sample1")
+    # state.remove("sample3")
+    # state.remove("sample4")
+    # state.remove("sample5")
 
-    # cache.printCacheState()
-    # cache.load("sample2")
-    # cache.printCacheState()
+    # state.logCacheState()
+    # state.load("sample2")
+    # state.logCacheState()
 
 
     return
@@ -126,40 +133,40 @@ export runTests = ->
 
 breakingCase = ->
 
-    cache.save("sample1", sampleData1)
+    state.save("sample1", sampleData1)
 
-    cache.save("sample2", sampleData2)
+    state.save("sample2", sampleData2)
 
-    cache.save("sample3", sampleData3)
+    state.save("sample3", sampleData3)
 
-    cache.save("sample4", sampleData4)
+    state.save("sample4", sampleData4)
 
-    cache.save("sample5", sampleData5)
+    state.save("sample5", sampleData5)
 
-    cache.load("state")
+    state.load("state")
 
-    cache.load("sample1")
-
-
+    state.load("sample1")
 
 
-    cache.load("sample3") #this lines breaks it :-(
 
-    # cache.load("sample4") #  this line repairs it
 
-    # cache.load("sample5") # this line does not matter
-    # cache.load("sample1") # this line does not matter
-    # cache.load("state") # this line does not matter
-    # cache.load("sample3") # this line does not matter
+    state.load("sample3") #this lines breaks it :-(
 
-    cache.remove("state")
+    # state.load("sample4") #  this line repairs it
 
-    cache.remove("sample5")
+    # state.load("sample5") # this line does not matter
+    # state.load("sample1") # this line does not matter
+    # state.load("state") # this line does not matter
+    # state.load("sample3") # this line does not matter
 
-    cache.remove("sample3")
+    state.remove("state")
 
-    cache.remove("sample1")
+    state.remove("sample5")
 
-    # cache.printCacheState()
-    sample2 = cache.load("sample2")
-    cache.printCacheState()
+    state.remove("sample3")
+
+    state.remove("sample1")
+
+    # state.logCacheState()
+    state.load("sample2")
+    state.logCacheState()
