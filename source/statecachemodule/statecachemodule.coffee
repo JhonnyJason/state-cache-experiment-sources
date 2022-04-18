@@ -147,8 +147,9 @@ export save = (id, contentObj) ->
     if idToCacheEntry[id]? then idToCacheEntry[id].touch()
     else new CacheEntry(id)
 
-    objCache[id] = contentObj
-    contentJson = toJson(contentObj)
+    if contentObj then objCache[id] = contentObj
+    contentJson = toJson(objCache[id])
+
     if contentJson == jsonCache[id] then return
     else
         jsonCache[id] = contentJson

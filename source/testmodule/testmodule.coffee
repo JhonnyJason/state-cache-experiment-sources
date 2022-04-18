@@ -53,8 +53,29 @@ export runTests = ->
     breakingCase()
     # state.logCacheState()
 
-    state = state.load("state")
-    olog state
+    asd = state.load("state")
+    olog { asd }
+
+    newObj = state.load("newObj")
+    olog {newObj}
+
+    newObj.property = "property"
+    state.save("newObj")
+    newObj2 = state.load("newObj")
+    olog { newObj, newObj2 }
+
+    newObj.otherProperty = "one"
+    newObj2.otherProperty = "two"
+    olog {newObj, newObj2}
+    
+    otherNewObject = {asd:1}
+    state.save("newObj", otherNewObject)
+
+    newObj3 = state.load("newObj")
+    olog  {newObj, newObj2, newObj3}
+
+
+    
     # state.logCacheState()
 
     # state.save("sample1", sampleData1)
@@ -169,4 +190,4 @@ breakingCase = ->
 
     # state.logCacheState()
     state.load("sample2")
-    state.logCacheState()
+    # state.logCacheState()
